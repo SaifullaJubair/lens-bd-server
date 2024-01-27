@@ -23,6 +23,7 @@ const run = async () => {
     //---------All collection Start here---------
     const DB = client.db("lens-bd");
     const usersCollection = DB.collection("users");
+    const lensCollection = DB.collection("lens");
 
     // ---------All collection End here----------
 
@@ -68,6 +69,18 @@ const run = async () => {
           return res.status(401).json({ error: "Invalid email or password" });
         }
         res.status(200).json({ message: "Login successful" });
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal server error" });
+      }
+    });
+
+    // Lens api start here
+
+    app.get("/lens", async (req, res) => {
+      try {
+        const result = await lensCollection.find({}).toArray();
+        res.send(result);
       } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Internal server error" });
