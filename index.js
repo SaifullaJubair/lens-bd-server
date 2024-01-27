@@ -75,6 +75,15 @@ const run = async () => {
       }
     });
 
+    app.get("/users", async (req, res) => {
+      try {
+        const result = await usersCollection.find({}).toArray();
+        res.send(result);
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal server error" });
+      }
+    });
     // Lens api start here
 
     app.get("/lens", async (req, res) => {
