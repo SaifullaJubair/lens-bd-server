@@ -86,6 +86,18 @@ const run = async () => {
         res.status(500).json({ error: "Internal server error" });
       }
     });
+    //  lens get by id
+    app.get("/lens/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const query = { _id: ObjectId(id) };
+        const result = await lensCollection.findOne(query);
+        res.send(result);
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal server error" });
+      }
+    });
   } finally {
   }
 };
