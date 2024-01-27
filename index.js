@@ -51,6 +51,28 @@ const run = async () => {
         res.status(500).json({ error: "Internal server error" });
       }
     });
+
+    // Login user
+
+    app.post("/login", async (req, res) => {
+      try {
+        const { email, password } = req.body;
+        const user = await usersCollection.findOne({ email });
+        // Check if the user exists
+        if (!user) {
+          return res.status(401).json({ error: "Invalid email or password" });
+        }
+        // Check if the password is correct
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+          return res.status(401).json({ error: "Invalid email or password" });
+        }
+        res.status(200).json({ message: "Login successful" });
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal server error" });
+      }
+    });
   } finally {
   }
 };
