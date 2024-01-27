@@ -109,6 +109,20 @@ const run = async () => {
       }
     });
 
+    app.put("/lens/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const query = { _id: ObjectId(id) };
+        const result = await lensCollection.updateOne(query, {
+          $set: req.body,
+        });
+        res.send(result);
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal server error" });
+      }
+    });
+
     // Lens api end here
   } finally {
   }
