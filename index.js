@@ -24,7 +24,7 @@ const run = async () => {
     const DB = client.db("lens-bd");
     const usersCollection = DB.collection("users");
     const lensCollection = DB.collection("lens");
-
+    const categoryCollection = DB.collection("category");
     // ---------All collection End here----------
 
     app.post("/signup", async (req, res) => {
@@ -136,6 +136,30 @@ const run = async () => {
     });
 
     // Lens api end here
+
+    // Category api start here
+
+    app.get("/category", async (req, res) => {
+      try {
+        const result = await categoryCollection.find({}).toArray();
+        res.send(result);
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal server error" });
+      }
+
+      app.delete("/category/:id", async (req, res) => {
+        try {
+          const id = req.params.id;
+          const query = { _id: new ObjectId(id) };
+          const result = await categoryCollection.deleteOne(query);
+          res.send(result);
+        } catch (error) {
+          console.error(error);
+          res.status(500).json({ error: "Internal server error" });
+        }
+      });
+    });
   } finally {
   }
 };
