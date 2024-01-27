@@ -90,7 +90,7 @@ const run = async () => {
     app.get("/lens/:id", async (req, res) => {
       try {
         const id = req.params.id;
-        const query = { _id: ObjectId(id) };
+        const query = { _id: new ObjectId(id) };
         const result = await lensCollection.findOne(query);
         res.send(result);
       } catch (error) {
@@ -112,10 +112,22 @@ const run = async () => {
     app.put("/lens/:id", async (req, res) => {
       try {
         const id = req.params.id;
-        const query = { _id: ObjectId(id) };
+        const query = { _id: new ObjectId(id) };
         const result = await lensCollection.updateOne(query, {
           $set: req.body,
         });
+        res.send(result);
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal server error" });
+      }
+    });
+
+    app.delete("/lens/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        const result = await lensCollection.deleteOne(query);
         res.send(result);
       } catch (error) {
         console.error(error);
