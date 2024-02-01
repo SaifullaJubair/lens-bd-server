@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const port = process.env.PORT || 5000;
@@ -29,11 +30,11 @@ const run = async () => {
 
     app.post("/signup", async (req, res) => {
       try {
-        const { username, email, password } = req.body;
+        const { name, email, password } = req.body;
         // Check if the user already exists
         const existingUser = await usersCollection.findOne({ email });
         if (existingUser) {
-          return res.status(400).json({ error: "User already exists" });
+          return res.json({ error: "User already exists" });
         }
 
         // Hash the password
@@ -41,7 +42,7 @@ const run = async () => {
 
         // Create New User
         const newUser = {
-          username,
+          name,
           email,
           password: hashedPassword,
         };
@@ -68,7 +69,15 @@ const run = async () => {
         if (!isPasswordValid) {
           return res.status(401).json({ error: "Invalid email or password" });
         }
-        res.status(200).json({ message: "Login successful" });
+        const token = jwt.sign(
+          { _id: user._id, email: user.email },
+          process.env.JWT_SECRET,
+          {
+            expiresIn: "30d",
+          }
+        );
+
+        res.status(200).json({ message: "Login successful", token });
       } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Internal server error" });
@@ -84,9 +93,21 @@ const run = async () => {
         res.status(500).json({ error: "Internal server error" });
       }
     });
+
+    app.delete("/users/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        const result = await usersCollection.deleteOne(query);
+        res.send(result);
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal server error" });
+      }
+    });
     // Lens api start here
 
-    app.get("/lens", async (req, res) => {
+    app.get("/lenses", async (req, res) => {
       try {
         const result = await lensCollection.find({}).toArray();
         res.send(result);
@@ -96,7 +117,7 @@ const run = async () => {
       }
     });
     //  lens get by id
-    app.get("/lens/:id", async (req, res) => {
+    app.get("/lenses/:id", async (req, res) => {
       try {
         const id = req.params.id;
         const query = { _id: new ObjectId(id) };
@@ -107,8 +128,8 @@ const run = async () => {
         res.status(500).json({ error: "Internal server error" });
       }
     });
-
-    app.post("/lens", async (req, res) => {
+    //  lens add
+    app.post("/add-lens", async (req, res) => {
       try {
         const result = await lensCollection.insertOne(req.body);
         res.send(result);
@@ -118,7 +139,9 @@ const run = async () => {
       }
     });
 
-    app.put("/lens/:id", async (req, res) => {
+    //  lens update
+
+    app.put("/update-lens/:id", async (req, res) => {
       try {
         const id = req.params.id;
         const query = { _id: new ObjectId(id) };
@@ -132,7 +155,8 @@ const run = async () => {
       }
     });
 
-    app.delete("/lens/:id", async (req, res) => {
+    //  lens delete
+    app.delete("/delete-lens/:id", async (req, res) => {
       try {
         const id = req.params.id;
         const query = { _id: new ObjectId(id) };
