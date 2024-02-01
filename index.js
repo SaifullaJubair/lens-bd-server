@@ -109,7 +109,10 @@ const run = async () => {
 
     app.get("/lenses", async (req, res) => {
       try {
-        const result = await lensCollection.find({}).toArray();
+        const result = await lensCollection
+          .find({})
+          .sort({ releaseDate: -1 })
+          .toArray();
         res.send(result);
       } catch (error) {
         console.error(error);
