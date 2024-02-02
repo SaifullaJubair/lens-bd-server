@@ -26,6 +26,7 @@ const run = async () => {
     const usersCollection = DB.collection("users");
     const lensCollection = DB.collection("lens");
     const categoryCollection = DB.collection("category");
+    const sellsCollection = DB.collection("sells");
     // ---------All collection End here----------
 
     app.post("/signup", async (req, res) => {
@@ -171,8 +172,47 @@ const run = async () => {
       }
     });
 
+    // delete lenses many
+    app.post("/bulk-delete-lenses", async (req, res) => {
+      try {
+        const ids = req.body.ids.map((id) => new ObjectId(id));
+        const query = { _id: { $in: ids } };
+        const result = await lensCollection.deleteMany(query);
+        res.send(result);
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal server error" });
+      }
+    });
+
     // Lens api end here
 
+    // Sells Api start here
+
+    // All Sells get
+    app.get("/sells", async (req, res) => {
+      try {
+        const result = await sellsCollection
+          .find({})
+          .sort({ sellDate: -1 })
+          .toArray();
+        res.send(result);
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal server error" });
+      }
+    });
+    // Sells Post
+    app.post("/sells", async (req, res) => {
+      try {
+        const result = await sellsCollection.insertOne(req.body);
+        res.send(result);
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal server error" });
+      }
+    });
+    // Sells Api end here
     // Category api start here
 
     app.get("/category", async (req, res) => {
